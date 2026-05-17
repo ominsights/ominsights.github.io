@@ -8,6 +8,7 @@
   const fieldMap = {
     full_name: 'entry.1659241752',
     email: 'entry.1597987213',
+    phone: 'entry.13752114',
     role: 'entry.715056374',
     firm: 'entry.1343436238',
   };
@@ -31,6 +32,15 @@
     }
 
     const formData = new FormData(form);
+    const rawPhone = String(formData.get('phone') || '').trim();
+    const phoneDigits = rawPhone.replace(/\D/g, '');
+    const nationalPhone = phoneDigits.startsWith('91') ? phoneDigits.slice(2) : phoneDigits;
+    if (nationalPhone.length < 10) {
+      showMessage('Please enter a valid phone number with +91.', 'error');
+      return;
+    }
+    formData.set('phone', `+91 ${nationalPhone}`);
+
     if (String(formData.get('website') || '').trim()) {
       showMessage("You're on the list. We'll reach out shortly to schedule your walkthrough.", 'success');
       form.reset();
