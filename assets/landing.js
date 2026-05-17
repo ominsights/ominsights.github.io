@@ -1,17 +1,69 @@
 (() => {
-  const form = document.querySelector('#cta form');
-  if (!form) return;
+  const form = document.querySelector('#lead-form');
+  if (!form) {
+    return;
+  }
 
-  form.addEventListener('submit', (event) => {
+  const endpoint = 'https://docs.google.com/forms/d/e/1FAIpQLScEwR41A03jGxikXqxtWz4mdYCtBhimOJ1J6vubNaqjoh2x-Q/formResponse';
+  const fieldMap = {
+    full_name: 'entry.1659241752',
+    email: 'entry.1597987213',
+    role: 'entry.715056374',
+    firm: 'entry.1343436238',
+  };
+
+  const button = form.querySelector('button[type="submit"]');
+  const message = form.querySelector('.form-message');
+
+  const showMessage = (text, tone) => {
+    if (!message) return;
+    message.textContent = text;
+    message.dataset.tone = tone;
+  };
+
+  form.addEventListener('submit', async (event) => {
     event.preventDefault();
+    showMessage('', '');
+
     if (!form.checkValidity()) {
       form.reportValidity();
       return;
     }
 
-    const panel = form.parentElement;
-    if (!panel) return;
+    const formData = new FormData(form);
+    if (String(formData.get('website') || '').trim()) {
+      showMessage("You're on the list. We'll reach out shortly to schedule your walkthrough.", 'success');
+      form.reset();
+      return;
+    }
 
-    panel.innerHTML = "<div class=\"flex flex-col items-start gap-3 py-6\"><div class=\"flex h-10 w-10 items-center justify-center rounded-full bg-accent text-accent-foreground\"><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" class=\"lucide lucide-circle-check h-5 w-5\" aria-hidden=\"true\"><circle cx=\"12\" cy=\"12\" r=\"10\"></circle><path d=\"m9 12 2 2 4-4\"></path></svg></div><h3 class=\"text-2xl text-primary-foreground\">You're on the list.</h3><p class=\"text-sm opacity-80\">We'll reach out shortly to schedule your walkthrough.</p></div>";
+    const payload = new URLSearchParams();
+    for (const [localName, googleField] of Object.entries(fieldMap)) {
+      payload.append(googleField, String(formData.get(localName) || '').trim());
+    }
+
+    if (button) {
+      button.disabled = true;
+      button.dataset.originalText = button.textContent || '';
+      button.textContent = 'Submitting...';
+    }
+
+    try {
+      await fetch(endpoint, {
+        method: 'POST',
+        mode: 'no-cors',
+        body: payload,
+      });
+
+      form.reset();
+      showMessage("You're on the list. We'll reach out shortly to schedule your walkthrough.", 'success');
+    } catch (error) {
+      showMessage('We could not submit the request. Please email hello@ominsights.in and we will schedule it manually.', 'error');
+    } finally {
+      if (button) {
+        button.disabled = false;
+        button.innerHTML = 'Join the Demo List <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14m-7-7 7 7-7 7"/></svg>';
+      }
+    }
   });
 })();
