@@ -72,7 +72,7 @@
     } finally {
       if (button) {
         button.disabled = false;
-        button.innerHTML = 'Join the Demo List <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14m-7-7 7 7-7 7"/></svg>';
+        button.innerHTML = 'Request Early Access <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14m-7-7 7 7-7 7"/></svg>';
       }
     }
   });
